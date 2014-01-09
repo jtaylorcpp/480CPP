@@ -27,14 +27,19 @@ def organize_array(array):
 
 # Creates logic function for each node - use only after read_file and sort
 def create_logic_functions(array):
-    for x in range (0,len(array)-1):#finds number of total node lines
-        logic_equations[x]=array[x][3]#sets initial input to first in list (position 4 from sorted list)
-        for y in range (4,len(array[x])-1):#from position 4 forward - include inputs
-            if (array[x][y].isalpha()):# is input is alphabetic it is added directly to equation
-                logic_equation[x]=logic_equation[x] + commands[array[x][2]] + array[x][y]
-            else:#else, in () add equation from earlier node
-                logic_equation[x]=logic_equation[x] + commands[array[x][2]] + "(" + loggic_equation[eval(array[x][y])]+ ")"
-    return logic_equation
+    logic_equs=[]#creates empty list for logic equations
+    for x in range (0,len(array)):  #loop netlist from node 1 to last ndoe
+        if(array[x][3].isalpha()):  #if the input is alphabetic
+            logic_equs.append(array[x][3]) # create new list element and add input
+        else:
+            logic_equs.append("(" + logic_equs[eval(array[x][3])-1] + ")")# adds logic equation called from earlier logic equation
+        for y in range (4,len(array[x])):
+            if(array[x][y].isalpha()):
+                logic_equs[x] = logic_equs[x] + commands[array[x][2]] + array[x][y]
+            else:
+                logic_equs[x] = logic_equs[x] + commands[array[x][2]] + "(" + logic_equs[eval(array[x][y])-1] + ")"
+
+    return logic_equs
 
 # Print nodes array to check organization.
 for z in range(0, len(nodes)):
