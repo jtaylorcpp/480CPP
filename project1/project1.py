@@ -41,6 +41,7 @@ def create_logic_functions(array):
 
     return logic_equs
 
+
 # Print nodes array to check organization.
 for z in range(0, len(nodes)):
     print (nodes[z])
