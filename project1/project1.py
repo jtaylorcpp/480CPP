@@ -40,18 +40,43 @@ def create_logic_functions(array):
                 logic_equs[x] = logic_equs[x] + commands[array[x][2]] + "(" + logic_equs[eval(array[x][y])-1] + ")"
 
     return logic_equs
+# logic function recursively
+def recursive_logic (node,array):
+    for x in range (3,len(array[node-1])):
+        if (x==3):
+            if (array[node-1][x].isalpha()):
+                logic_equ=array[node-1][x]
+            else:
+                logic_equ="(" + recursive_logic((eval(array[node-1][x])),array) + ")"
+        else:
+            if (array[node-1][x].isalpha()):
+                logic_equ=logic_equ + commands[array[node-1][2]] + array[node-1][x]
+            else:
+                logic_equ=logic_equ + commands[array[node-1][2]] + "(" + recursive_logic((eval(array[node-1][x])),array) + ")"
+    return logic_equ
 
-
-# Print nodes array to check organization.
+'''# Print nodes array to check organization.
 for z in range(0, len(nodes)):
-    print (nodes[z])
+    print (nodes[z]) '''
 
 #print array
 def print_array(array):
     for x in range (0,len(array)):
         print(array[x])
 
-# From this point on, everything is still in the works.
+#finds top nodes of logic equations
+def find_top_nodes(array):
+    top_node_list = []
+    for x in range (0,len(array)):
+        top_node_list.append(array[x][0])
+    for x in range (0,len(array)):
+        for y in range (3,len(array[x])):
+            for z in range (0,len(top_node_list)):
+                if (array[x][y] == top_node_list[z]):
+                    top_node_list.remove(array[x][y])
+                    break
+    return top_node_list
+'''# From this point on, everything is still in the works.
 A = 1;
 B = 1;
 C = 1;
@@ -89,3 +114,4 @@ for z in range(0, len(nodes)):
 
 output += '\n\nTruth Table for the Selected Outputs\n-------------------------------------\n'
 print(output)
+'''
