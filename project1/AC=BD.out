@@ -1,0 +1,27 @@
+Circuit Listing
+---------------
+1	XNOR2	XNOR	C	D	
+2	XNOR1	XNOR	A	B	
+3	AC=BD	AND	1	2	
+
+
+Truth Table for Selected Outputs
+--------------------------------
+A     B     C     D     AC=BD 
+
+0     0     0     0     1     
+0     0     0     1     0     
+0     0     1     0     0     
+0     0     1     1     1     
+0     1     0     0     0     
+0     1     0     1     0     
+0     1     1     0     0     
+0     1     1     1     0     
+1     0     0     0     0     
+1     0     0     1     0     
+1     0     1     0     0     
+1     0     1     1     0     
+1     1     0     0     1     
+1     1     0     1     0     
+1     1     1     0     0     
+1     1     1     1     1     
