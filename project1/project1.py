@@ -1,67 +1,60 @@
-#first file of project 1
+'''
+#################################################################
+
+    Project #1      : Combinational Logic Simulator (Python)
+    Class           : ECE 480 - Software Engineering
+    Instructor      : Dr. Chandra
+    Date            : January 10, 2014
+    
+    Group           : Orr Karney
+                      Christian Miranda
+                      Kevin Sellon
+                      Jesse Taylor
+
+#################################################################
+'''
 
 import sys
 
-MAX_GATES   = 50
-MAX_PIO     = 26
-MAX_NAME    = 12
-MAX_TYPE    = 5
-MAX_INP     = 8
+MAX_GATES =     50      # Maximum number of gates allowed.
+MAX_IO =        26      # Maximum number of input and outputs allowed.
+MAX_FANIN =     8       # Maximum fan-in of devices
 
+# Command list used to translate LDF boolean expressions to python eval boolean expressions.
 commands = {'AND': '&', 'OR': '|', 'XOR': '^','NAND':'&','XNOR':'^','NOR':'|'}
 
-# DEBUG - file = ['6\tCARRY\tOR\t3\t4\t5', '1\tXOR1\tXOR\tA\tB', '3\tAND2\tAND\tA\tC', '4\tAND1\tAND\tA\tB', '5\tAND3\tAND\tB\tC', '2\tSUM\tXOR\t1\tC']
-# DEBUG -file = ['1\tNOTA\tNOT\tA', '2\tNOTB\tNOT\tB', '3\tY0\tAND\t1\t2', '4\tY1\tAND\t1\tB', '5\tY2\tAND\t2\tA', '6\tY3\tAND\tA\tB']
-
-# Load file lines into array.
-''' For DEBUG -
-def read_file (file):
-    args = [None]*len(file)
-    for y in range(0, len(file)):
-        args[y] = file[y].split();
-    return args'''
 def read_file():
-    if(len(sys.argv)>1):
-        input_file =  open(sys.argv[1])
-        file = lines = [line.strip() for line in input_file]
-        input_file.close()
-        print(file)
-        return file
+    if (len(sys.argv) > 1):
+        inputFile = open(sys.argv[1])
+        args = []
+        file = lines = [line.strip() for line in inputFile]
+        args = [None]*len(file)
+        for y in range(0, len(file)):
+            args[y] = file[y].split();
+        inputFile.close()
+        return args
     else:
-        print("No input file...")
+        print('No input file found.')
         sys.exit()
 
 # Organize file lines by gate index.
 def organize_array(array):
-    for x in range (1,len(array)):
-        node_number = array[x-1][0]
-        if (eval(node_number) != x):
-            swap = array[eval(node_number)-1]
-            array[eval(node_number)-1] = array[x-1]
-            array[x-1] = swap
+    # Added a double pass to ensure everything gets organized.
+    for a in range(2):
+        for x in range (1,len(array)):
+            node_number = array[x-1][0]
+            if (eval(node_number) != x):
+                swap = array[eval(node_number)-1]
+                array[eval(node_number)-1] = array[x-1]
+                array[x-1] = swap
 
-# Creates logic function for each node - use only after read_file and sort
-def create_logic_functions(array):
-    logic_equs=[]#creates empty list for logic equations
-    for x in range (0,len(array)):  #loop netlist from node 1 to last ndoe
-        if(array[x][3].isalpha()):  #if the input is alphabetic
-            logic_equs.append(array[x][3]) # create new list element and add input
-        else:
-            logic_equs.append("(" + logic_equs[eval(array[x][3])-1] + ")")# adds logic equation called from earlier logic equation
-        for y in range (4,len(array[x])):
-            if(array[x][y].isalpha()):
-                logic_equs[x] = logic_equs[x] + commands[array[x][2]] + array[x][y]
-            else:
-                logic_equs[x] = logic_equs[x] + commands[array[x][2]] + "(" + logic_equs[eval(array[x][y])-1] + ")"
-
-    return logic_equs
-# logic function recursively
+# Recursively obtain boolean expressions
 def recursive_logic (node,array):
     if (array[node-1][2] == 'NOT'):
         if (array[node-1][3].isalpha()):
             return "inv("+array[node-1][3]+")"
         else:
-                logic_equ="inv(" + recursive_logic((eval(array[node-1][x])),array) + ")"
+            logic_equ="inv(" + recursive_logic((eval(array[node-1][x])),array) + ")"
     for x in range (3,len(array[node-1])):
         if (x==3):
             if (array[node-1][x].isalpha()):
@@ -80,7 +73,7 @@ def recursive_logic (node,array):
 
 
 
-#finds top nodes of logic equations
+# Find output nodes from netlist
 def find_top_nodes(array):
     top_node_list = []
     for x in range (0,len(array)):
@@ -94,7 +87,7 @@ def find_top_nodes(array):
                     break
     return top_node_list
 
-#decimal to binary
+# Convert int to binary bit array
 def binary_dict(integer,input_array):
     b_dict = {}
     bin_number = bin(integer)[2:]
@@ -105,7 +98,7 @@ def binary_dict(integer,input_array):
         b_dict[input_array[x]] = values[x]
     return b_dict
 
-#find all alphabetic inputs
+# Find all alphabetic inputs (A-Z)
 def find_base_input(array):
     inputs =[]
     for x in range (0,len(array)):
@@ -119,12 +112,13 @@ def find_base_input(array):
                         if (array[x][y] == item):
                             shouldadd = False
                             break
-                    if(shouldadd):                    
+                    if(shouldadd):
                         inputs.append(array[x][y])
     return inputs
-            
+
+# Simulate boolean expressions with all possible inputs
 def simulate_logic (input_array,node_array,file_array):
-   #creates input+output X input**2+1
+    #creates input+output X input**2+1
     simulate_array=[[] for y in range ((2**len(input_array))+1)]
     simulate_array[0].extend(input_array)
     for x in range (len(node_array)):
@@ -143,61 +137,97 @@ def simulate_logic (input_array,node_array,file_array):
             simulate_array[x+1].append(eval(logic_dict[node_array[z]]))
     return simulate_array
 
-#print_array function
+# Print multidimensional array with a better visual
 def array_print(array):
     for x in range (len(array)):
         print(array[x])
 
+# Not logic (regular not expression returns boolean instead of binary)
 def inv(logic_equ):
     return 0 if logic_equ else 1
 
+# Display netlist
 def display_netlist(netlist):
-    output =  "Circuit Listing\n"
+    output = "Circuit Listing\n"
     output += "---------------\n"
+
     for x in range (len(netlist)):
         for y in range (len(netlist[x])):
-            output += netlist[x][y] + "\t"
+            output += netlist[x][y] + '\t'
         output += "\n"
     return output
 
+# Display truth table
 def display_truthtable(truthtable):
-    output =  "Truth Table for Selected Outputs\n"
+    output = "Truth Table for Selected Outputs\n"
     output += "--------------------------------\n"
+
     for x in range (len(truthtable)):
         for y in range (len(truthtable[x])):
-            output += truthtable[x][y] + "\t"
+            #widths.append(len(max(truthtable[x][y], key=len)))
+            output += str(truthtable[x][y]).ljust(6)
         output += "\n"
+        if (x==0):
+            output += "\n"
     return output
 
-def save_display (filename,output):  
-    if (len(sys.argv) == 3):
-        f = open(filename,'w')
-        f.write(output)
-        f.close
-    else:
-        print(output)
-  
-    
+# Save display
+def save_display (filename,output):
+    f = open(filename,'w')
+    f.write(output)
+    f.close
+
+# Validate gate count
+def validate_gate_count(array):
+    if (len(array) > MAX_GATES):
+        print("Maximum number of gates (%d) exceeded." % MAX_GATES)
+        sys.exit()
+
+# Validate circuit input or output count
+def validate_io_count(array, io):
+    if (len(array) > MAX_IO):
+        out = "Maximum number of "
+        #       out += ("inputs" if io==0 else "outputs")
+        out += ("inputs", "outputs")[io]
+        out += " (%d) exceeded." % MAX_IO
+        print(out)
+        sys.exit()
+
+
 def main():
-    #read netlist from file
-    netlist = read_file()
-    #sets netlist in ascending order
-    organize_array(netlist)
-    #finds all inputs that are not nodes
-    inputs = find_base_input(netlist)
-    #print(inputs)
-    #finds all nodes not used as inputs
-    top_nodes = find_top_nodes(netlist)
-    #print(top_nodes)
-    #creates logic equations by recursion
-    #simulates for all bit combinations
-    #outputs into array
-    simulate = simulate_logic(inputs,top_nodes,netlist)
-    #display netlist
-    output = display_netlist(netlist)
-    #display truthtable
-    output += "\n\n" + display_truthtable(simulate)
-    #save truth table to file
-    save_display(sys.argv[2],output)
     
+    # Read netlist from file
+    netlist = read_file()
+    
+    # Determine the number of gates in circuit
+    validate_gate_count(netlist);
+    
+    # Organize netlist in ascending order
+    organize_array(netlist)
+    
+    # Finds all inputs and validate input count
+    inputs = find_base_input(netlist)
+    validate_io_count(inputs, 0)
+    
+    # Finds all output nodes
+    top_nodes = find_top_nodes(netlist)
+    validate_io_count(top_nodes, 1)
+    
+    # Simulate logic
+    simulate = simulate_logic(inputs,top_nodes,netlist)
+    
+    # Display netlist
+    output = display_netlist(netlist)
+    output += "\n\n"
+    
+    # Display truth table
+    output += display_truthtable(simulate)
+    
+    # Save or display results
+    if (len(sys.argv) == 3):
+        save_display(sys.argv[2],output)
+
+    # Print output to screen regardless of disk operations.
+    print(output)
+
 main()
