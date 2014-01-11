@@ -47,7 +47,16 @@ def organize_array(array):
                 swap = array[eval(node_number)-1]
                 array[eval(node_number)-1] = array[x-1]
                 array[x-1] = swap
-
+                
+# Alphabetize Input Array
+def alpha_inputs(array):
+    alpha=[]
+    for x in range(26):
+        for y in range(len(array)):
+            if((ord(array[y])%65) == x):
+                alpha.append(array[y])
+    return alpha
+    
 # Recursively obtain boolean expressions
 def recursive_logic (node,array):
     if (array[node-1][2] == 'NOT'):
@@ -208,6 +217,9 @@ def main():
     # Finds all inputs and validate input count
     inputs = find_base_input(netlist)
     validate_io_count(inputs, 0)
+
+    # Alphabetize input list
+    inputs = alpha_inputs(inputs)
     
     # Finds all output nodes
     top_nodes = find_top_nodes(netlist)
